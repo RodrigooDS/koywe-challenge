@@ -16,7 +16,7 @@ Asegúrate de tener las siguientes herramientas instaladas en tu sistema:
    Renombra el archivo de variables de entorno para configurarlo:
 
    ```bash
-   mv .env.txt .env
+   mv .env.example .env
    ```
 
    Después de renombrar el archivo, completa las variables vacías en el archivo .env:
