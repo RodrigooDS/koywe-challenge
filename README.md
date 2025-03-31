@@ -39,7 +39,26 @@
    cp .env.example .env
    ```
 
-   Completa las variables en `.env` según tu configuración.
+   Completa las siguientes variables en el archivo `.env`:
+
+   ```plaintext
+   # Database Configuration
+   DB_USER=postgres          # Usuario de PostgreSQL
+   DB_PASSWORD=postgres      # Contraseña de PostgreSQL
+   DB_NAME=crypto_quote      # Nombre de la base de datos
+   DB_PORT=5432             # Puerto de PostgreSQL (predeterminado)
+   DB_HOST=localhost        # Host de PostgreSQL (predeterminado)
+
+   # Prisma Configuration
+   DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+
+   # JWT Configuration
+   JWT_SECRET=your-secret-key    # Clave secreta para JWT
+   ```
+
+   > **Importante**:
+   >
+   > - Los valores mostrados son ejemplos, ajústalos según tu configuración
 
 2. **Instalar dependencias**
 
