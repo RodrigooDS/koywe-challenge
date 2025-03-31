@@ -4,152 +4,171 @@
 
 ### Prerequisitos
 
-- Node.js (v16 o superior)
-- Docker y Docker Compose
+Asegúrate de tener las siguientes herramientas instaladas en tu sistema:
+
+- **Node.js** (v16 o superior)
+- **Docker** y **Docker Compose**
 
 ### Pasos para la instalación
 
-1. **Configuración del entorno**
+1. **Configurar el entorno**
+
+   Renombra el archivo de variables de entorno para configurarlo:
 
    ```bash
-   # Renombrar el archivo de variables de entorno
-   .env.txt a .env
+   mv .env.txt .env
    ```
 
-2. **Instalación de dependencias**
+   Después de renombrar el archivo, completa las variables vacías en el archivo .env:
+
+   ```plaintext
+   # Database Configuration
+   DB_USER=postgres          # Usuario de PostgreSQL
+   DB_PASSWORD=postgres      # Contraseña de PostgreSQL
+   DB_NAME=crypto_quote      # Nombre de la base de datos
+   DB_PORT=5432             # Puerto (ya configurado)
+   DB_HOST=localhost        # Host (ya configurado)
+
+   # Prisma Configuration
+   DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+
+   # JWT Configuration
+   JWT_SECRET=your-secret-key    # Cambia esto por tu clave secreta
+   ```
+
+   > **Importante**:
+   >
+   > - Asegúrate de completar DB_USER, DB_PASSWORD, y DB_NAME con tus credenciales de PostgreSQL
+   > - Cambia el JWT_SECRET por una clave segura
+
+2. **Instalar dependencias**
+
+   Ejecuta el siguiente comando para instalar todas las dependencias del proyecto:
 
    ```bash
    npm install
    ```
 
-3. **Levantar servicios con Docker**
+3. **Levantar PostgreSQL con Docker**
+
+   Utiliza Docker Compose para levantar la base de datos PostgreSQL:
 
    ```bash
-   docker-compose up -d
+   docker-compose up -d postgres
    ```
 
-4. **Configuración de Prisma**
+4. **Configurar Prisma**
 
-   ```bash
-   # Generar el cliente de Prisma
-   npx prisma generate
+   - Genera el cliente de Prisma:
 
-   # Ejecutar las migraciones
-   npx prisma migrate deploy
-   ```
+     ```bash
+     npx prisma generate
+     ```
+
+   - Ejecuta las migraciones en la base de datos:
+
+     ```bash
+     npx prisma migrate deploy
+     ```
 
 5. **Iniciar la aplicación**
+
+   Una vez configurado todo, puedes iniciar la aplicación con el siguiente comando:
+
    ```bash
    npx nx serve crypto-quote-monorepo
    ```
 
+---
+
 ## 🧪 Pruebas
 
-Para ejecutar las pruebas:
+Para ejecutar las pruebas y generar el reporte de cobertura, usa:
 
 ```bash
-# Pruebas unitarias
-nx test --passWithNoTests
-
-# Pruebas e2e
-nx e2e --passWithNoTests
-
-# Coverage
-nx test --coverage --passWithNoTests
+npm run all:test
 ```
+
+---
 
 ## 🤖 Uso de Inteligencia Artificial
 
-Este proyecto ha utilizado las siguientes herramientas de IA:
+Este proyecto ha integrado las siguientes herramientas de Inteligencia Artificial para optimizar el proceso de desarrollo:
 
 ### GitHub Copilot
 
-- **Uso principal**: Autocompletado de código y generación de tests
-- **Beneficios obtenidos**:
-  - Aceleración en la escritura de código repetitivo
-  - Sugerencias inteligentes para pruebas unitarias
-  - Ayuda en la documentación del código
+- **Uso principal**: Autocompletado de código y generación de tests.
 
-Todo el código generado por IA ha sido revisado y entendido completamente por el equipo de desarrollo, asegurando que cumple con los estándares de calidad y las mejores prácticas.
+---
 
 ## 📚 Documentación de Nx
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+---
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+## Tareas y ejecución
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/nest?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+Para ejecutar el servidor de desarrollo de tu aplicación:
 
-## Finish your CI setup
-
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/sa8SJbZXxA)
-
-## Run tasks
-
-To run the dev server for your app, use:
-
-```sh
+```bash
 npx nx serve crypto-quote-monorepo
 ```
 
-To create a production bundle:
+Para ver todos los objetivos disponibles para un proyecto, usa:
 
-```sh
-npx nx build crypto-quote-monorepo
-```
-
-To see all available targets to run for a project, run:
-
-```sh
+```bash
 npx nx show project crypto-quote-monorepo
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+[Más sobre cómo ejecutar tareas en la documentación &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+---
 
-## Add new projects
+## Agregar nuevos proyectos
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
+Puedes agregar nuevos proyectos a tu espacio de trabajo de manera sencilla utilizando los [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) y sus generadores de código.
 
-Use the plugin's generator to create new projects.
+Para generar una nueva aplicación, usa:
 
-To generate a new application, use:
-
-```sh
+```bash
 npx nx g @nx/nest:app demo
 ```
 
-To generate a new library, use:
+Para generar una nueva librería, usa:
 
-```sh
+```bash
 npx nx g @nx/node:lib mylib
 ```
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+Consulta la lista de plugins instalados con:
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```bash
+npx nx list
+```
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Luego, ejecuta `npx nx list <plugin-name>` para explorar las capacidades específicas de un plugin. También puedes [instalar Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) para explorar plugins y generadores directamente desde tu IDE.
 
-## Install Nx Console
+[Más sobre Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Explora el registro de plugins &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+---
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## Instalar Nx Console
 
-## Useful links
+Nx Console es una extensión para tu editor que mejora tu experiencia de desarrollo. Te permite ejecutar tareas, generar código y mejora la autocompletación de código en tu IDE. Está disponible para **VSCode** e **IntelliJ**.
 
-Learn more:
+[Instalar Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
 
-- [Learn more about this workspace setup](https://nx.dev/nx-api/nest?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+---
 
-And join the Nx community:
+## Enlaces útiles
+
+- [Más sobre esta configuración de espacio de trabajo](https://nx.dev/nx-api/nest?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- [Aprende sobre Nx en CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- [Publicar paquetes con Nx](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- [¿Qué son los Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+
+Únete a la comunidad de Nx:
 
 - [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- [Síguenos en X](https://twitter.com/nxdevtools) o [LinkedIn](https://www.linkedin.com/company/nrwl)
+- [Canal de YouTube](https://www.youtube.com/@nxdevtools)
+- [Nuestro blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
