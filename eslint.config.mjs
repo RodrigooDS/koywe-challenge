@@ -17,12 +17,28 @@ export default [
           allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?js$'],
           depConstraints: [
             {
+              sourceTag: 'type:app',
+              onlyDependOnLibsWithTags: ['type:ui', 'type:util', 'type:domain', 'type:feature', 'type:core'],
+            },
+            {
               sourceTag: 'type:ui',
               onlyDependOnLibsWithTags: ['type:ui', 'type:util'],
             },
             {
               sourceTag: 'type:feature',
-              onlyDependOnLibsWithTags: ['type:ui', 'type:util', 'type:domain'],
+              onlyDependOnLibsWithTags: ['type:ui', 'type:util', 'type:domain', 'type:core'],
+            },
+            {
+              sourceTag: 'type:domain',
+              onlyDependOnLibsWithTags: ['type:util', 'type:core'],
+            },
+            {
+              sourceTag: 'type:util',
+              onlyDependOnLibsWithTags: ['type:util'],
+            },
+            {
+              sourceTag: 'type:core',
+              onlyDependOnLibsWithTags: ['type:util'],
             },
           ],
         },
@@ -31,7 +47,6 @@ export default [
   },
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.cts', '**/*.mts', '**/*.js', '**/*.jsx', '**/*.cjs', '**/*.mjs'],
-    // Override or add rules here
     rules: {},
   },
 ];
