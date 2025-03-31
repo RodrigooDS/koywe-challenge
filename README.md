@@ -1,238 +1,239 @@
-# 🚀 Prueba Técnica: API de Cotización de Divisas (Fiat ⇄ Crypto) con NestJS
+# Crypto Quote Monorepo
 
-Bienvenido a este desafío para crear una **API** moderna en **NestJS** para convertir divisas fiat y criptomonedas. ¡Prepárate para demostrar tus habilidades y buenas prácticas de desarrollo!
+## 🚀 Configuración Inicial
 
----
+### Prerrequisitos
 
-## 📚 Objetivo
+Asegúrate de tener las siguientes herramientas instaladas en tu sistema:
 
-Desarrollar una aplicación back-end en NestJS que exponga dos endpoints REST para realizar conversiones entre monedas fiat y criptomonedas. La solución debe incluir:
+- **Node.js** (v16 o superior)
+- **Docker** y **Docker Compose**
 
-- Arquitectura modular y escalable.
-- Seguridad básica con autenticación.
-- Consulta en tiempo real a un proveedor de precios (por ejemplo, la API de Cryptomkt) o su simulación.
-- Documentación clara y concisa(deseable).
-- Pruebas unitarias y de integración (opcional).
+### Pasos para la instalación
 
-> **💡 Nota sobre la Estructura del Proyecto:** 
-> Este repositorio proporciona una estructura base que implementa el patrón Facade junto con las prácticas recomendadas de NestJS. Esta estructura es una guía para ayudarte a comenzar, pero no es un requisito estricto. Te animamos a:
-> - Adaptar la estructura según tu experiencia y criterio
-> - Implementar patrones alternativos si los consideras más apropiados
-> - Reorganizar los módulos de la manera que mejor se ajuste a tu solución
-> 
-> Lo fundamental es que tu implementación mantenga los principios de código limpio, modular y mantenible.
+1. **Configurar el entorno**
 
----
+   Renombra el archivo de variables de entorno para configurarlo:
 
-## 🔍 Requerimientos Funcionales
+   ```bash
+   cp .env.example .env
+   ```
 
-### 1️⃣ Endpoint para Crear una Cotización
+   Después de renombrar el archivo, completa las variables vacías en el archivo .env:
 
-- **Método y Ruta:** `POST /quote`
-- **Cuerpo de la Solicitud (JSON):**
-  
-  ```json
-  {
-    "amount": 1000000,
-    "from": "ARS",
-    "to": "ETH"
-  }
-  ```
+   ```plaintext
+   # Database Configuration
+   DB_USER=postgres          # Usuario de PostgreSQL
+   DB_PASSWORD=postgres      # Contraseña de PostgreSQL
+   DB_NAME=crypto_quote      # Nombre de la base de datos
+   DB_PORT=5432             # Puerto (ya configurado)
+   DB_HOST=localhost        # Host (ya configurado)
 
-- **Campos:**
-  - **amount:** Monto a convertir.
-  - **from:** Código de la moneda origen (Ej.: ARS, CLP, MXN, USDC, BTC, ETH).
-  - **to:** Código de la moneda destino (Ej.: ETH, USDC, CLP, USD, ARS).
+   # Prisma Configuration
+   DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
 
-- **Proceso:**
-  1. **Consulta a Proveedor de Precios:**  
-     Obtener el valor de `rate` en tiempo real consultando una API externa, por ejemplo:
+   # JWT Configuration
+   JWT_SECRET=your-secret-key    # Cambia esto por tu clave secreta
+   ```
+
+   > **Importante**:
+   >
+   > - Asegúrate de completar DB_USER, DB_PASSWORD, y DB_NAME con tus credenciales de PostgreSQL
+
+2. **Instalar dependencias**
+
+   Ejecuta el siguiente comando para instalar todas las dependencias del proyecto:
+
+   ```bash
+   npm install
+   ```
+
+3. **Levantar PostgreSQL con Docker**
+
+   Utiliza Docker Compose para levantar la base de datos PostgreSQL:
+
+   ```bash
+   docker-compose up -d
+   ```
+
+4. **Configurar Prisma**
+
+   - Genera el cliente de Prisma:
+
+     ```bash
+     npx prisma generate
      ```
-     https://api.exchange.cryptomkt.com/api/3/public/price/rate?from={to}&to={from}
+
+   - Ejecuta las migraciones en la base de datos:
+
+     ```bash
+     npx prisma migrate deploy
      ```
-     > **Importante:** Si no se puede integrar la API real, simula la respuesta y documenta en el README cómo se realizaría la consulta real.
-  
-  2. **Cálculo:**  
-     Calcular el `convertedAmount` multiplicando el `amount` por el `rate` obtenido.
-  
-  3. **Gestión de Timestamps e Identificador:**  
-     - Generar un ID único para la cotización.
-     - Registrar el timestamp de generación.
-     - Establecer un `expiresAt` (por ejemplo, 5 minutos después de la creación).
-  
-  4. **Registro de la Cotización:**  
-     Almacenar en la base de datos la siguiente información:
-     - Identificador único.
-     - Valores de `from`, `to` y `amount`.
-     - Tasa de conversión (`rate`) y `convertedAmount`.
-     - Timestamp de creación y `expiresAt`.
 
-- **Respuesta Esperada: ARS -> ETH**
+5. **Iniciar la aplicación**
 
-  ```json
-  {
-    "id": "a1b2c3d4",
-    "from": "ARS",
-    "to": "ETH",
-    "amount": 1000000,
-    "rate": 0.0000023,
-    "convertedAmount": 2.3,
-    "timestamp": "2025-02-03T12:00:00Z",
-    "expiresAt": "2025-02-03T12:05:00Z"
-  }
-  ```
+   Una vez configurado todo, puedes iniciar la aplicación con el siguiente comando:
 
-  **Respuesta Esperada: ETH -> ARS**
-
-  ```json
-  {
-  "id": "d4c3b2a1",
-  "from": "ETH",
-  "to": "ARS",
-  "amount": 1,
-  "rate": 434782.61,
-  "convertedAmount": 434782.61,
-  "timestamp": "2025-02-03T12:00:00Z",
-  "expiresAt": "2025-02-03T12:05:00Z"
-  }
-  ```
+   ```bash
+   npx nx serve crypto-quote-monorepo
+   ```
 
 ---
 
-### 2️⃣ Endpoint para Obtener una Cotización
+## 📊 Funcionalidades implementadas
 
-- **Método y Ruta:** `GET /quote/:id`
-- **Proceso:**
-  - Recuperar la cotización desde la base de datos utilizando el ID proporcionado.
-  - Validar que la cotización aún sea válida (es decir, que el timestamp actual no supere el valor de `expiresAt`).
-- **Respuesta:**
-  - Si la cotización existe y es válida, devolver la información completa en formato JSON (similar al ejemplo anterior).
-  - En caso contrario, responder con el código HTTP adecuado (por ejemplo, `404 Not Found`).
+### API de Cotización de Divisas (Fiat ⇄ Crypto)
+
+Este proyecto implementa una API completa para la conversión entre monedas fiat y criptomonedas con las siguientes características:
+
+#### Endpoints principales
+
+1. **Crear una cotización**
+
+   - **Método y Ruta:** `POST /quote`
+   - **Descripción:** Genera una nueva cotización entre monedas
+   - **Ejemplo de solicitud:**
+     ```json
+     {
+       "amount": 1000000,
+       "from": "ARS",
+       "to": "ETH"
+     }
+     ```
+
+2. **Consultar una cotización**
+   - **Método y Ruta:** `GET /quote/:id`
+   - **Descripción:** Recupera una cotización existente por su ID
+
+#### Sistema de autenticación
+
+La API implementa un sistema completo de autenticación con JWT:
+
+1. **Registro de usuarios**
+
+   - **Método y Ruta:** `POST /auth/register`
+
+2. **Inicio de sesión**
+
+   - **Método y Ruta:** `POST /auth/login`
+
+3. **Protección de endpoints**
+   - Todos los endpoints de cotización están protegidos mediante un Guard de NestJS que valida los tokens JWT
+   - Se requiere incluir el token JWT en el encabezado Authorization de las solicitudes
+
+### Integración con proveedor de precios
+
+La API se integra con el proveedor de precios Cryptomkt para obtener tasas de cambio en tiempo real entre diferentes monedas. La integración se realiza mediante solicitudes HTTP a la API de Cryptomkt:
+
+```
+https://api.exchange.cryptomkt.com/api/3/public/price/rate?from={to}&to={from}
+```
+
+### Documentación de la API
+
+La documentación completa de la API está disponible a través de Swagger UI en:
+
+```
+http://localhost:3000/v1/docs
+```
+
+Esta documentación incluye todos los endpoints, esquemas de datos, y ejemplos de solicitudes y respuestas.
 
 ---
 
-### 3️⃣ Registro de Cotizaciones
+## 🏗️ Arquitectura del proyecto
 
-Cada cotización generada debe registrarse en la base de datos con los siguientes datos:
+Este proyecto está estructurado como un monorepo utilizando Nx, lo que permite una organización modular y escalable del código. La arquitectura sigue una clara separación de responsabilidades:
 
-- **ID único** de la cotización.
-- Valores de `from`, `to` y `amount`.
-- Tasa de conversión (`rate`) y monto convertido (`convertedAmount`).
-- Timestamps de creación y `expiresAt`.
+### Estructura del monorepo
 
-#### Opciones de Base de Datos:
-- **Opción 1:** MongoDB con Mongoose.
-- **Opción 2:** PostgreSQL con Prisma.
+- **Aplicaciones (apps)**: Contiene la aplicación principal y potencialmente otras aplicaciones (como servicios microservicios)
+- **Librerías (libs)**: Contiene el código compartido entre aplicaciones
 
-> **Selecciona** la opción con la que te sientas más cómodo y **documenta** tu elección en este README.
+### Organización del código por capas
+
+- **Use Cases**: Implementa la lógica de negocio específica para cada funcionalidad
+
+  - Encapsula las reglas y flujos de negocio
+  - Orquesta las interacciones entre servicios y repositorios
+  - Independiente de la infraestructura subyacente
+
+- **Services**: Proporciona funcionalidades específicas y reutilizables
+
+  - Implementa operaciones comunes y transversales
+  - Gestiona integraciones con servicios externos (como Cryptomkt)
+  - Ofrece abstracciones para operaciones complejas
+
+- **Repositories**: Maneja el acceso y persistencia de datos
+  - Implementa el patrón Repository para abstraer la capa de datos
+  - Utiliza Prisma para interactuar con la base de datos PostgreSQL
+  - Proporciona métodos para operaciones CRUD sobre las entidades
+
+### Principios arquitectónicos aplicados
+
+- **Clean Architecture**: Separación clara entre la lógica de negocio e infraestructura
+- **Dependency Inversion**: Los componentes de alto nivel no dependen de los de bajo nivel
+- **Single Responsibility**: Cada módulo tiene una única razón para cambiar
+- **Interface Segregation**: Interfaces específicas para cada cliente
+
+Esta arquitectura asegura que el sistema sea:
+
+- **Modular**: Cada componente puede evolucionar independientemente
+- **Testeable**: La separación de capas facilita las pruebas unitarias
+- **Mantenible**: La organización clara reduce la complejidad del código
+- **Escalable**: Nuevas funcionalidades se pueden agregar sin afectar el código existente
 
 ---
 
-## 🔒 Seguridad
+## 🧪 Pruebas
 
-### Autenticación
+Para ejecutar las pruebas y generar el reporte de cobertura, usa:
 
-- **Protege** ambos endpoints implementando autenticación con JWT (JSON Web Tokens).
-- Utiliza un **Guard** o middleware en NestJS para verificar la presencia y validez del JWT en el header `Authorization`.
-- Implementa endpoints para registro y login que generen y validen los JWT.
-- En caso de no proporcionar un token o ser inválido, la API debe retornar un error `401 Unauthorized`.
+```bash
+npm run all:test
+```
 
----
+El proyecto incluye:
 
-## 💻 Front-End (Opcional)
-
-### Objetivo
-
-Desarrolla una interfaz utilizando Next.js que permita:
-
-- **Crear Cotizaciones:**  
-  Un formulario donde el usuario ingrese `amount`, `from` y `to` para generar una cotización.
-  
-- **Consultar Cotizaciones:**  
-  Un campo para ingresar el ID de la cotización y mostrar sus detalles.
-
-#### Consideraciones:
-- La aplicación debe ser desarrollada utilizando Next.js
-- La interfaz debe integrarse con la API desarrollada
-- Su desarrollo es opcional para la aprobación de esta prueba
+- Pruebas unitarias para los casos de uso y servicios
+- Pruebas de integración para los endpoints de la API
+- Mocks para simular la integración con proveedores externos
 
 ---
 
 ## 🤖 Uso de Inteligencia Artificial
 
-Se permite y fomenta el uso de herramientas de IA (como ChatGPT, GitHub Copilot, etc.) para el desarrollo de esta prueba técnica. Sin embargo, se requiere:
+Este proyecto ha integrado las siguientes herramientas de Inteligencia Artificial para optimizar el proceso de desarrollo:
 
-- Mencionar en el README qué herramientas de IA se utilizaron
-- Explicar brevemente cómo se aprovecharon estas herramientas
-- Asegurarse de entender y poder explicar todo el código generado por IA
-- Mantener un balance entre el código generado por IA y el desarrollo propio
+### GitHub Copilot
 
-El uso de IA debe ser un complemento para mejorar la eficiencia del desarrollo, no un sustituto del entendimiento técnico.
+- **Uso principal**: Autocompletado de código y generación de tests.
+- **Aplicación**: Se utilizó para generar plantillas iniciales de servicios y controladores, así como para ayudar en la implementación de pruebas automatizadas.
 
 ---
 
-## 🛠 Requerimientos de Calidad y Herramientas
+## 📚 Documentación de Nx
 
-- **Testing:**  
-  Implementa pruebas unitarias básicas para la lógica de negocio (por ejemplo, en los servicios que gestionan las cotizaciones).
+## Tareas y ejecución
 
-- **Linter y Formateo:**  
-  Utiliza ESLint y Prettier para mantener un código limpio, legible y coherente.
+Para ejecutar el servidor de desarrollo de tu aplicación:
 
-- **Documentación:**  
-  Este archivo README.md debe incluir:
-  - Instrucciones para levantar la aplicación localmente (o con Docker, si decides implementarlo).
-  - Cómo ejecutar las pruebas.
-  - Detalles de las variables de entorno (incluye un archivo de ejemplo, como `.env.example`).
-  - La elección de la base de datos y cualquier configuración especial.
+```bash
+npx nx serve crypto-quote-monorepo
+```
 
-- **Dockerización (Opcional):**  
-  Si dockerizas la aplicación, incluye un `Dockerfile` y/o `docker-compose.yml` con instrucciones para levantar tanto la aplicación como la base de datos en contenedores.
+Para ver todos los objetivos disponibles para un proyecto, usa:
 
----
+```bash
+npx nx show project crypto-quote-monorepo
+```
 
-## 🎯 Expectativas del Desarrollador
-
-- **Calidad y Claridad:**  
-  - Código modular, limpio y bien documentado.
-  - Fácil mantenimiento y comprensión del mismo.
-  
-- **Buenas Prácticas:**  
-  - Uso correcto de NestJS e inyección de dependencias.
-  - Aplicación de principios SOLID.
-  - Implementación del patrón Facade para centralizar la lógica de negocio.
-  
-- **Seguridad y Testing:**  
-  - Autenticación efectiva.
-  - Pruebas unitarias y de integración para respaldar la funcionalidad.
-  
-- **Documentación Completa:**  
-  Asegúrate de que el README ofrezca toda la información necesaria para levantar la aplicación, configurar variables de entorno y ejecutar pruebas.
-
-- **Front-End (Opcional):**  
-  Su integración con el back-end deberá ser funcional y demostrar la capacidad de crear y consultar cotizaciones.
+[Más sobre cómo ejecutar tareas en la documentación &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
 
 ---
 
-## 📦 Instrucciones de Entrega
+## Instalar Nx Console
 
-- **Repositorio:**
-  - Antes de comenzar, haz un fork de este repositorio para que tu solución se base en esta plantilla.
-  - El código debe subirse a un repositorio **público** en GitHub.
-  - Se te proporcionará un correo electrónico al cual deberás dar acceso como colaborador del repositorio para la revisión del código.
-  - Alternativamente, puedes enviar un archivo ZIP que incluya la carpeta `.git` para mantener el historial de commits.
-  
-  > **Nota:** Si eliges la opción del ZIP, asegúrate de que el archivo incluya todo el historial de Git para poder evaluar la evolución del desarrollo.
+Nx Console es una extensión para tu editor que mejora tu experiencia de desarrollo. Te permite ejecutar tareas, generar código y mejora la autocompletación de código en tu IDE. Está disponible para **VSCode** e **IntelliJ**.
 
-- **README.md:**  
-  - Incluir instrucciones detalladas para levantar la aplicación (back-end y front-end si aplica).
-  - Explicar cómo ejecutar las pruebas.
-  - Documentar la configuración de variables de entorno y otra información relevante.
-  - Si implementas Docker, describe los pasos para levantar los contenedores.
-
-- **Código y Documentación:**  
-  Verifica que el código compile correctamente y la aplicación funcione sin errores. Asegúrate de que este README sea claro, completo y atractivo para otros desarrolladores.
-
----
-
-### 🚀 ¡Buena suerte y a codificar! 👩‍💻👨‍💻
+[Instalar Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
