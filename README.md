@@ -2,7 +2,7 @@
 
 ## 🚀 Configuración Inicial
 
-### Prerequisitos
+### Prerrequisitos
 
 Asegúrate de tener las siguientes herramientas instaladas en tu sistema:
 
@@ -16,7 +16,7 @@ Asegúrate de tener las siguientes herramientas instaladas en tu sistema:
    Renombra el archivo de variables de entorno para configurarlo:
 
    ```bash
-   mv .env.example .env
+   cp .env.example .env
    ```
 
    Después de renombrar el archivo, completa las variables vacías en el archivo .env:
@@ -39,7 +39,6 @@ Asegúrate de tener las siguientes herramientas instaladas en tu sistema:
    > **Importante**:
    >
    > - Asegúrate de completar DB_USER, DB_PASSWORD, y DB_NAME con tus credenciales de PostgreSQL
-   > - Cambia el JWT_SECRET por una clave segura
 
 2. **Instalar dependencias**
 
@@ -54,7 +53,7 @@ Asegúrate de tener las siguientes herramientas instaladas en tu sistema:
    Utiliza Docker Compose para levantar la base de datos PostgreSQL:
 
    ```bash
-   docker-compose up -d postgres
+   docker-compose up -d
    ```
 
 4. **Configurar Prisma**
@@ -81,6 +80,111 @@ Asegúrate de tener las siguientes herramientas instaladas en tu sistema:
 
 ---
 
+## 📊 Funcionalidades implementadas
+
+### API de Cotización de Divisas (Fiat ⇄ Crypto)
+
+Este proyecto implementa una API completa para la conversión entre monedas fiat y criptomonedas con las siguientes características:
+
+#### Endpoints principales
+
+1. **Crear una cotización**
+
+   - **Método y Ruta:** `POST /quote`
+   - **Descripción:** Genera una nueva cotización entre monedas
+   - **Ejemplo de solicitud:**
+     ```json
+     {
+       "amount": 1000000,
+       "from": "ARS",
+       "to": "ETH"
+     }
+     ```
+
+2. **Consultar una cotización**
+   - **Método y Ruta:** `GET /quote/:id`
+   - **Descripción:** Recupera una cotización existente por su ID
+
+#### Sistema de autenticación
+
+La API implementa un sistema completo de autenticación con JWT:
+
+1. **Registro de usuarios**
+
+   - **Método y Ruta:** `POST /auth/register`
+
+2. **Inicio de sesión**
+
+   - **Método y Ruta:** `POST /auth/login`
+
+3. **Protección de endpoints**
+   - Todos los endpoints de cotización están protegidos mediante un Guard de NestJS que valida los tokens JWT
+   - Se requiere incluir el token JWT en el encabezado Authorization de las solicitudes
+
+### Integración con proveedor de precios
+
+La API se integra con el proveedor de precios Cryptomkt para obtener tasas de cambio en tiempo real entre diferentes monedas. La integración se realiza mediante solicitudes HTTP a la API de Cryptomkt:
+
+```
+https://api.exchange.cryptomkt.com/api/3/public/price/rate?from={to}&to={from}
+```
+
+### Documentación de la API
+
+La documentación completa de la API está disponible a través de Swagger UI en:
+
+```
+http://localhost:3000/v1/docs
+```
+
+Esta documentación incluye todos los endpoints, esquemas de datos, y ejemplos de solicitudes y respuestas.
+
+---
+
+## 🏗️ Arquitectura del proyecto
+
+Este proyecto está estructurado como un monorepo utilizando Nx, lo que permite una organización modular y escalable del código. La arquitectura sigue una clara separación de responsabilidades:
+
+### Estructura del monorepo
+
+- **Aplicaciones (apps)**: Contiene la aplicación principal y potencialmente otras aplicaciones (como servicios microservicios)
+- **Librerías (libs)**: Contiene el código compartido entre aplicaciones
+
+### Organización del código por capas
+
+- **Use Cases**: Implementa la lógica de negocio específica para cada funcionalidad
+
+  - Encapsula las reglas y flujos de negocio
+  - Orquesta las interacciones entre servicios y repositorios
+  - Independiente de la infraestructura subyacente
+
+- **Services**: Proporciona funcionalidades específicas y reutilizables
+
+  - Implementa operaciones comunes y transversales
+  - Gestiona integraciones con servicios externos (como Cryptomkt)
+  - Ofrece abstracciones para operaciones complejas
+
+- **Repositories**: Maneja el acceso y persistencia de datos
+  - Implementa el patrón Repository para abstraer la capa de datos
+  - Utiliza Prisma para interactuar con la base de datos PostgreSQL
+  - Proporciona métodos para operaciones CRUD sobre las entidades
+
+### Principios arquitectónicos aplicados
+
+- **Clean Architecture**: Separación clara entre la lógica de negocio e infraestructura
+- **Dependency Inversion**: Los componentes de alto nivel no dependen de los de bajo nivel
+- **Single Responsibility**: Cada módulo tiene una única razón para cambiar
+- **Interface Segregation**: Interfaces específicas para cada cliente
+
+Esta arquitectura asegura que el sistema sea:
+
+- **Modular**: Cada componente puede evolucionar independientemente
+- **Testeable**: La separación de capas facilita las pruebas unitarias
+- **Mantenible**: La organización clara reduce la complejidad del código
+- **Escalable**: Nuevas funcionalidades se pueden agregar sin afectar el código existente
+
+---
+
 ## 🧪 Pruebas
 
 Para ejecutar las pruebas y generar el reporte de cobertura, usa:
@@ -88,6 +192,12 @@ Para ejecutar las pruebas y generar el reporte de cobertura, usa:
 ```bash
 npm run all:test
 ```
+
+El proyecto incluye:
+
+- Pruebas unitarias para los casos de uso y servicios
+- Pruebas de integración para los endpoints de la API
+- Mocks para simular la integración con proveedores externos
 
 ---
 
@@ -98,12 +208,11 @@ Este proyecto ha integrado las siguientes herramientas de Inteligencia Artificia
 ### GitHub Copilot
 
 - **Uso principal**: Autocompletado de código y generación de tests.
+- **Aplicación**: Se utilizó para generar plantillas iniciales de servicios y controladores, así como para ayudar en la implementación de pruebas automatizadas.
 
 ---
 
 ## 📚 Documentación de Nx
-
----
 
 ## Tareas y ejecución
 
@@ -123,52 +232,8 @@ npx nx show project crypto-quote-monorepo
 
 ---
 
-## Agregar nuevos proyectos
-
-Puedes agregar nuevos proyectos a tu espacio de trabajo de manera sencilla utilizando los [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) y sus generadores de código.
-
-Para generar una nueva aplicación, usa:
-
-```bash
-npx nx g @nx/nest:app demo
-```
-
-Para generar una nueva librería, usa:
-
-```bash
-npx nx g @nx/node:lib mylib
-```
-
-Consulta la lista de plugins instalados con:
-
-```bash
-npx nx list
-```
-
-Luego, ejecuta `npx nx list <plugin-name>` para explorar las capacidades específicas de un plugin. También puedes [instalar Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) para explorar plugins y generadores directamente desde tu IDE.
-
-[Más sobre Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Explora el registro de plugins &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
----
-
 ## Instalar Nx Console
 
 Nx Console es una extensión para tu editor que mejora tu experiencia de desarrollo. Te permite ejecutar tareas, generar código y mejora la autocompletación de código en tu IDE. Está disponible para **VSCode** e **IntelliJ**.
 
 [Instalar Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
----
-
-## Enlaces útiles
-
-- [Más sobre esta configuración de espacio de trabajo](https://nx.dev/nx-api/nest?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Aprende sobre Nx en CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Publicar paquetes con Nx](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [¿Qué son los Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-Únete a la comunidad de Nx:
-
-- [Discord](https://go.nx.dev/community)
-- [Síguenos en X](https://twitter.com/nxdevtools) o [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Canal de YouTube](https://www.youtube.com/@nxdevtools)
-- [Nuestro blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
